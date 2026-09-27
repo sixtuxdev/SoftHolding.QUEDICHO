@@ -1,0 +1,128 @@
+<Window x:Class="SoftHolding.QUEDICHO.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QUEDICHO — Transcripción local"
+        Width="1040"
+        Height="720"
+        MinWidth="820"
+        MinHeight="580"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WindowBackgroundBrush}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="QUEDICHO" FontSize="26" FontWeight="SemiBold" />
+                <TextBlock Text="Transcripción de audio del sistema, privada y local"
+                           Margin="0,3,0,0"
+                           Foreground="{StaticResource SecondaryTextBrush}" />
+            </StackPanel>
+            <Border Grid.Column="1" Background="#E8F7ED" CornerRadius="16" Padding="14,7" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="9" Height="9" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0" />
+                    <TextBlock Text="{Binding StatusText}" Foreground="#137A35" FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,0,0,18">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Audio de origen" FontWeight="SemiBold" Margin="0,0,0,7" />
+                    <ComboBox ItemsSource="{Binding Devices}"
+                              SelectedItem="{Binding SelectedDevice}"
+                              DisplayMemberPath="DisplayName"
+                              IsEnabled="{Binding IsDeviceSelectionEnabled}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Motor" FontWeight="SemiBold" Margin="0,0,0,7" />
+                    <Border Background="#F4F7FB" CornerRadius="7" Padding="12,10">
+                        <TextBlock Text="Whisper Local · Español" />
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,20,0,0">
+                    <Button Content="INICIAR" Style="{StaticResource PrimaryButtonStyle}"
+                            Command="{Binding StartCommand}" IsEnabled="{Binding CanStart}" />
+                    <Button Content="{Binding PauseButtonText}" Command="{Binding PauseResumeCommand}"
+                            IsEnabled="{Binding CanPauseOrResume}" />
+                    <Button Content="DETENER" Command="{Binding StopCommand}" IsEnabled="{Binding CanStop}" />
+                    <TextBlock Text="{Binding ElapsedText}" Margin="16,0,0,0" VerticalAlignment="Center"
+                               FontSize="18" FontWeight="SemiBold" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="12" Padding="22">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="TRANSCRIPCIÓN EN VIVO" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,14" />
+                <ListBox Grid.Row="1" ItemsSource="{Binding Segments}" BorderThickness="0" Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,13">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Timestamp}" Foreground="{StaticResource SecondaryTextBrush}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBox">
+                                        <Grid>
+                                            <ScrollViewer Focusable="False">
+                                                <ItemsPresenter />
+                                            </ScrollViewer>
+                                            <TextBlock Text="La transcripción aparecerá aquí cuando detectemos voz."
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Visibility="{Binding IsTranscriptEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.Style>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="3" Margin="2,14,0,0" Foreground="{StaticResource SecondaryTextBrush}"
+                   Text="Privacidad: el audio se procesa en este equipo. QUEDICHO no almacena audio ni lo envía a la nube." />
+    </Grid>
+</Window>

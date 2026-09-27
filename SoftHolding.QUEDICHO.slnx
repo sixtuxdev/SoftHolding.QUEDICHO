@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SoftHolding.QUEDICHO.Domain/SoftHolding.QUEDICHO.Domain.csproj" />
+    <Project Path="src/SoftHolding.QUEDICHO.Application/SoftHolding.QUEDICHO.Application.csproj" />
+    <Project Path="src/SoftHolding.QUEDICHO.Audio/SoftHolding.QUEDICHO.Audio.csproj" />
+    <Project Path="src/SoftHolding.QUEDICHO.Transcription/SoftHolding.QUEDICHO.Transcription.csproj" />
+    <Project Path="src/SoftHolding.QUEDICHO.Infrastructure/SoftHolding.QUEDICHO.Infrastructure.csproj" />
+    <Project Path="src/SoftHolding.QUEDICHO.Desktop/SoftHolding.QUEDICHO.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SoftHolding.QUEDICHO.UnitTests/SoftHolding.QUEDICHO.UnitTests.csproj" />
+    <Project Path="tests/SoftHolding.QUEDICHO.IntegrationTests/SoftHolding.QUEDICHO.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,242 @@
+############################################################
+# .NET 9 + Blazor WebAssembly + Visual Studio 2022
+############################################################
+
+# =============================================================================
+# Visual Studio 2022
+# =============================================================================
+
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files
+*.rsuser
+
+# Visual Studio 2015/2017/2019/2022 cache/options
+.vs/
+
+# =============================================================================
+# Build results - IMPORTANTE: Estos archivos NO deben versionarse
+# =============================================================================
+
+# Bin y Obj de todos los proyectos
+**/bin/
+**/obj/
+
+# Build outputs específicos
+**/[Dd]ebug/
+**/[Rr]elease/
+**/[Rr]eleases/
+**/x64/
+**/x86/
+**/[Aa]rm64/
+**/[Aa]rm/
+**/[Bb]uild/
+**/bld/
+**/[Oo]ut/
+
+# Logs
+**/[Ll]og/
+**/[Ll]ogs/
+*.log
+
+# =============================================================================
+# .NET Core / .NET 9 / ASP.NET Core
+# =============================================================================
+
+# Project lock files (nuget)
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet packages
+**/packages/
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# NuGet v3's project.json
+*.nuget.props
+*.nuget.targets
+
+# =============================================================================
+# Blazor WebAssembly - ESPECÍFICO para este proyecto
+# =============================================================================
+
+# Blazor build artifacts
+**/dist/
+**/work/
+**/_framework/
+
+# Static Web Assets (Blazor WASM)
+**/staticwebassets.build.json
+**/staticwebassets.build.json.cache
+**/staticwebassets.development.json
+**/staticwebassets.build.endpoints.json
+**/staticwebassets.runtime.json
+
+# Blazor boot files
+**/blazor.boot.json
+**/blazor.boot.json.gz
+**/blazor.hotreload.json
+
+# WebAssembly files
+**/*.wasm
+**/webcil/
+**/tmp-webcil/
+
+# Razor/Blazor compilado
+**/rjsmcshtml.dswa.cache.json
+**/rjsmrazor.dswa.cache.json
+**/rpswa.dswa.cache.json
+**/rbcswa.dswa.cache.json
+
+# Ref assemblies (intermediate compilation)
+**/ref/
+**/refint/
+
+# =============================================================================
+# ASP.NET Core / Server
+# =============================================================================
+
+# Publish output
+**/publish/
+**/wwwroot/dist/
+
+# =============================================================================
+# Archivos generados por compilación - NO versionar
+# =============================================================================
+
+# AssemblyInfo auto-generado
+**/AssemblyInfo.cs
+**/AssemblyInfoInputs.cache
+
+# Cache de referencias de proyectos
+**/*.csproj.AssemblyReference.cache
+**/*.csproj.FileListAbsolute.txt
+
+# PDB y símbolos
+*.pdb
+*.ipdb
+
+# DLL y EXE compilados
+*.dll
+*.exe
+
+# Otros archivos de build
+*.cache
+*.tmp
+*.temp
+
+# =============================================================================
+# User Secrets / Environment / Configuración local
+# =============================================================================
+
+# ASP.NET Core user secrets
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.json
+!**/appsettings.json
+
+# Secrets files
+**/secrets.json
+secrets.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# =============================================================================
+# Entity Framework / Migrations
+# =============================================================================
+
+# SQL Server local DB
+*.mdf
+*.ldf
+*.ndf
+
+# =============================================================================
+# Tools
+# =============================================================================
+
+# ReSharper / Rider
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings
+*.DotSettings.user
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+
+# Test Results
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+*.opencover
+
+# =============================================================================
+# OS generated files
+# =============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+._*
+
+# Linux
+*~
+.fuse_hidden*
+
+# =============================================================================
+# Node / Frontend (si se usa npm en el futuro)
+# =============================================================================
+
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# =============================================================================
+# Database backups
+# =============================================================================
+
+*.bak
+*.backup
+*.bacpac
+*.dacpac
+*.sqlbackup
+
+# =============================================================================
+# Temporary files
+# =============================================================================
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.~
+
+# =============================================================================
+# Certificates / Keys - NUNCA versionar estos archivos
+# =============================================================================
+
+*.pfx
+*.pem
+*.cert
+*.key
+*.crt

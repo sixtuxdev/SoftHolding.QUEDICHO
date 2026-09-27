@@ -57,9 +57,14 @@ public sealed class LocalWhisperTranscriptionProvider(
             var threads = _options.Threads > 0
                 ? _options.Threads
                 : Math.Max(1, Environment.ProcessorCount - 2);
+            var beamSize = Math.Max(1, _options.BeamSize);
+            var maximumNoSpeechProbability = Math.Clamp(_options.MaximumNoSpeechProbability, 0, 1);
             _processor = _factory.CreateBuilder()
                 .WithLanguage(_options.Language)
                 .WithThreads(threads)
+                .WithTemperature(0)
+                .WithNoSpeechThreshold(maximumNoSpeechProbability)
+                .WithBeamSearchSamplingStrategy(strategy => strategy.WithBeamSize(beamSize))
                 .WithProbabilities()
                 .Build();
             StatusChanged?.Invoke(this, "Modelo Whisper listo");
@@ -87,6 +92,16 @@ public sealed class LocalWhisperTranscriptionProvider(
             double? probability = double.IsNaN(segment.Probability)
                 ? null
                 : Math.Clamp((double)segment.Probability, 0, 1);
+            var noSpeechProbability = float.IsNaN(segment.NoSpeechProbability)
+                ? 0
+                : Math.Clamp(segment.NoSpeechProbability, 0, 1);
+            if (probability < Math.Clamp(_options.MinimumSegmentProbability, 0, 1) ||
+                noSpeechProbability >= Math.Clamp(_options.MaximumNoSpeechProbability, 0, 1))
+            {
+                WhisperLog.SegmentDiscarded(logger, probability, noSpeechProbability);
+                continue;
+            }
+
             yield return new TranscriptionResult(segment.Text, segment.Start, segment.End, probability);
         }
 

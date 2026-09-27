@@ -25,11 +25,28 @@ En la ventana:
 4. Reproduce una llamada, video o grabación con voz en español.
 5. Usa **PAUSAR/REANUDAR** o **DETENER**.
 
+La transcripción usa fragmentos continuos y solapados. El perfil predeterminado prioriza fidelidad: acumula hasta 5 segundos de contexto durante voz continua, conserva 1 segundo entre fragmentos y descarta resultados de baja confianza para evitar texto inventado. Cuando la persona hace una pausa, el fragmento se procesa sin esperar los 5 segundos completos.
+
+## Escribir en cursor
+
+La opción **Escribir en cursor** está desactivada de forma predeterminada. Al activarla, cada segmento final también se inserta en el control editable que tenga el foco en otra aplicación. Puede alternarse con el botón de la ventana o con el atajo global **Ctrl + Shift + Y**, incluso cuando QUEDICHO está en segundo plano.
+
+La inserción:
+
+- no lleva QUEDICHO al frente;
+- conserva tildes y `ñ` mediante pegado Unicode con restauración del portapapeles y entrada directa como respaldo;
+- evita la propia ventana de QUEDICHO y campos de contraseña detectables;
+- se procesa en una cola independiente para no bloquear la captura ni Whisper;
+- puede ser bloqueada por Windows cuando la aplicación destino se ejecuta con privilegios superiores.
+
+Para probarla manualmente, inicia una sesión, activa **Escribir en cursor**, coloca el cursor en Bloc de notas, Word o un campo editable del navegador y reproduce audio con voz. Pulsa **Ctrl + Shift + Y** para detener la escritura externa sin detener la transcripción interna.
+
 ## Datos locales
 
 - Modelo: `%LOCALAPPDATA%\SoftHolding\QUEDICHO\Models`
 - SQLite: `%LOCALAPPDATA%\SoftHolding\QUEDICHO\Data\quedicho.db`
 - Logs: `%LOCALAPPDATA%\SoftHolding\QUEDICHO\Logs`
+- Preferencias de escritura: `%LOCALAPPDATA%\SoftHolding\QUEDICHO\Settings\text-injection.json`
 
 El MVP no almacena el audio capturado y no lo envía a servicios externos.
 

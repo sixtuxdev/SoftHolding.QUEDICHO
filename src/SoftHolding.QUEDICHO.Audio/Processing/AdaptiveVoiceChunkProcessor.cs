@@ -9,6 +9,7 @@ public sealed class AdaptiveVoiceChunkProcessor(IOptions<AudioProcessingOptions>
     private readonly Queue<AudioFrame> _preRoll = new();
     private readonly List<float> _currentSamples = [];
     private bool _recording;
+    private bool _hasEmittedStreamingChunk;
     private int _silenceMilliseconds;
     private int _speechMilliseconds;
     private int _sampleRate = 16_000;
@@ -19,6 +20,7 @@ public sealed class AdaptiveVoiceChunkProcessor(IOptions<AudioProcessingOptions>
         _preRoll.Clear();
         _currentSamples.Clear();
         _recording = false;
+        _hasEmittedStreamingChunk = false;
         _silenceMilliseconds = 0;
         _speechMilliseconds = 0;
         _chunkStart = TimeSpan.Zero;
@@ -63,13 +65,26 @@ public sealed class AdaptiveVoiceChunkProcessor(IOptions<AudioProcessingOptions>
             _silenceMilliseconds += frameMilliseconds;
         }
 
-        var currentDurationMilliseconds = _currentSamples.Count * 1000d / frame.SampleRate;
-        if ((_silenceMilliseconds >= _options.SilenceToCloseMilliseconds &&
-             _speechMilliseconds >= _options.MinimumSpeechMilliseconds) ||
-            currentDurationMilliseconds >= _options.MaximumChunkMilliseconds)
+        if (_silenceMilliseconds >= _options.SilenceToCloseMilliseconds)
         {
-            result.Add(CreateChunk(frame.SampleRate));
+            if (_speechMilliseconds >= _options.MinimumSpeechMilliseconds ||
+                (_hasEmittedStreamingChunk && _speechMilliseconds > 0))
+            {
+                result.Add(CreateChunk(frame.SampleRate));
+            }
+
             Reset();
+            return result;
+        }
+
+        var currentDurationMilliseconds = _currentSamples.Count * 1000d / frame.SampleRate;
+        if (isSpeech &&
+            _speechMilliseconds >= _options.MinimumSpeechMilliseconds &&
+            currentDurationMilliseconds >= _options.StreamingChunkMilliseconds)
+        {
+            var chunk = CreateChunk(frame.SampleRate);
+            result.Add(chunk);
+            ContinueWithOverlap(chunk);
         }
 
         return result;
@@ -77,7 +92,10 @@ public sealed class AdaptiveVoiceChunkProcessor(IOptions<AudioProcessingOptions>
 
     public AudioChunk? Flush()
     {
-        if (!_recording || _speechMilliseconds < _options.MinimumSpeechMilliseconds || _currentSamples.Count == 0)
+        if (!_recording ||
+            (_speechMilliseconds < _options.MinimumSpeechMilliseconds &&
+             (!_hasEmittedStreamingChunk || _speechMilliseconds == 0)) ||
+            _currentSamples.Count == 0)
         {
             Reset();
             return null;
@@ -89,6 +107,26 @@ public sealed class AdaptiveVoiceChunkProcessor(IOptions<AudioProcessingOptions>
     }
 
     private AudioChunk CreateChunk(int sampleRate) => new(_currentSamples.ToArray(), sampleRate, _chunkStart);
+
+    private void ContinueWithOverlap(AudioChunk emittedChunk)
+    {
+        var requestedOverlapSamples = (int)Math.Round(
+            _options.OverlapMilliseconds * emittedChunk.SampleRate / 1000d);
+        var overlapSamples = Math.Clamp(requestedOverlapSamples, 0, _currentSamples.Count);
+        var overlapStartIndex = _currentSamples.Count - overlapSamples;
+        var retainedSamples = overlapSamples == 0
+            ? []
+            : _currentSamples.GetRange(overlapStartIndex, overlapSamples);
+
+        _currentSamples.Clear();
+        _currentSamples.AddRange(retainedSamples);
+        _chunkStart = emittedChunk.Start + emittedChunk.Duration -
+                      TimeSpan.FromSeconds((double)overlapSamples / emittedChunk.SampleRate);
+        _speechMilliseconds = 0;
+        _silenceMilliseconds = 0;
+        _recording = true;
+        _hasEmittedStreamingChunk = true;
+    }
 
     private void TrimPreRoll()
     {

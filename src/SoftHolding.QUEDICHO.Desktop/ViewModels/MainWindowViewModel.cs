@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SoftHolding.QUEDICHO.Application.Audio;
 using SoftHolding.QUEDICHO.Application.Sessions;
+using SoftHolding.QUEDICHO.Application.TextInjection;
 using SoftHolding.QUEDICHO.Application.Transcription;
 using WpfApplication = System.Windows.Application;
 
@@ -17,6 +18,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly IAudioDeviceCatalog _deviceCatalog;
     private readonly ITranscriptionSessionCoordinator _coordinator;
     private readonly ITranscriptionProvider _transcriptionProvider;
+    private readonly ITextInjectionService _textInjectionService;
+    private readonly IGlobalHotkeyService _globalHotkeyService;
     private readonly Stopwatch _elapsed = new();
     private readonly DispatcherTimer _timer;
     private bool _disposed;
@@ -37,14 +40,23 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _isBusy;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TextInjectionButtonText))]
+    private bool _isTextInjectionEnabled;
+
     public MainWindowViewModel(
         IAudioDeviceCatalog deviceCatalog,
         ITranscriptionSessionCoordinator coordinator,
-        ITranscriptionProvider transcriptionProvider)
+        ITranscriptionProvider transcriptionProvider,
+        ITextInjectionService textInjectionService,
+        IGlobalHotkeyService globalHotkeyService)
     {
         _deviceCatalog = deviceCatalog;
         _coordinator = coordinator;
         _transcriptionProvider = transcriptionProvider;
+        _textInjectionService = textInjectionService;
+        _globalHotkeyService = globalHotkeyService;
+        _isTextInjectionEnabled = textInjectionService.IsEnabled;
         _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnTimerTick, WpfApplication.Current.Dispatcher);
         _timer.Stop();
 
@@ -53,6 +65,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _coordinator.ErrorOccurred += OnErrorOccurred;
         _transcriptionProvider.StatusChanged += OnProviderStatusChanged;
         _deviceCatalog.DevicesChanged += OnDevicesChanged;
+        _textInjectionService.StateChanged += OnTextInjectionStateChanged;
+        _globalHotkeyService.Pressed += OnGlobalHotkeyPressed;
     }
 
     public ObservableCollection<AudioDeviceItemViewModel> Devices { get; } = [];
@@ -64,6 +78,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public bool CanStop => !IsBusy && _coordinator.State is TranscriptionSessionState.Listening or TranscriptionSessionState.Paused;
     public bool IsDeviceSelectionEnabled => !IsBusy && _coordinator.State is not TranscriptionSessionState.Listening and not TranscriptionSessionState.Paused;
     public string PauseButtonText => _coordinator.State == TranscriptionSessionState.Paused ? "REANUDAR" : "PAUSAR";
+    public string TextInjectionButtonText => IsTextInjectionEnabled ? "● ACTIVADO" : "○ DESACTIVADO";
+    public string TextInjectionShortcutText => $"Atajo global: {_textInjectionService.GlobalHotkey}";
 
     public async Task InitializeAsync() => await ReloadDevicesAsync();
 
@@ -150,6 +166,23 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
+    [RelayCommand]
+    private async Task ToggleTextInjectionAsync()
+    {
+        try
+        {
+            await _textInjectionService.ToggleAsync();
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(
+                exception.Message,
+                "No se pudo cambiar Escribir en cursor",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+    }
+
     private async Task ReloadDevicesAsync()
     {
         var selectedId = SelectedDevice?.Id;
@@ -200,6 +233,24 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void OnProviderStatusChanged(object? sender, string status) =>
         _ = WpfApplication.Current.Dispatcher.InvokeAsync(() => StatusText = status);
 
+    private void OnTextInjectionStateChanged(object? sender, TextInjectionStateChangedEventArgs eventArgs) =>
+        _ = WpfApplication.Current.Dispatcher.InvokeAsync(() => IsTextInjectionEnabled = eventArgs.IsEnabled);
+
+    private void OnGlobalHotkeyPressed(object? sender, EventArgs eventArgs) =>
+        _ = ToggleTextInjectionFromHotkeyAsync();
+
+    private async Task ToggleTextInjectionFromHotkeyAsync()
+    {
+        try
+        {
+            await _textInjectionService.ToggleAsync();
+        }
+        catch (Exception exception)
+        {
+            await WpfApplication.Current.Dispatcher.InvokeAsync(() => StatusText = exception.Message);
+        }
+    }
+
     private void OnTimerTick(object? sender, EventArgs eventArgs) =>
         ElapsedText = _elapsed.Elapsed.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
 
@@ -228,6 +279,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _coordinator.ErrorOccurred -= OnErrorOccurred;
         _transcriptionProvider.StatusChanged -= OnProviderStatusChanged;
         _deviceCatalog.DevicesChanged -= OnDevicesChanged;
+        _textInjectionService.StateChanged -= OnTextInjectionStateChanged;
+        _globalHotkeyService.Pressed -= OnGlobalHotkeyPressed;
         _disposed = true;
         GC.SuppressFinalize(this);
     }

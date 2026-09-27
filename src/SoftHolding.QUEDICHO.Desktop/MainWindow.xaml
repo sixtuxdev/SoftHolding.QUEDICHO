@@ -41,6 +41,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
@@ -59,7 +60,7 @@
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="Motor" FontWeight="SemiBold" Margin="0,0,0,7" />
                     <Border Background="#F4F7FB" CornerRadius="7" Padding="12,10">
-                        <TextBlock Text="Whisper Local · Español" />
+                        <TextBlock Text="Whisper Local · Precisión mejorada · Español" />
                     </Border>
                 </StackPanel>
 
@@ -72,6 +73,41 @@
                     <TextBlock Text="{Binding ElapsedText}" Margin="16,0,0,0" VerticalAlignment="Center"
                                FontSize="18" FontWeight="SemiBold" />
                 </StackPanel>
+
+                <Border Grid.Row="2" Grid.ColumnSpan="3" Margin="0,18,0,0" Padding="14,12"
+                        CornerRadius="8" Background="#F4F7FB" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,18,0">
+                            <TextBlock Text="Escribir en cursor" FontWeight="SemiBold" />
+                            <TextBlock Text="Envía únicamente segmentos confirmados a la aplicación activa"
+                                       Foreground="{StaticResource SecondaryTextBrush}" FontSize="12" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="{Binding TextInjectionButtonText}"
+                                Command="{Binding ToggleTextInjectionCommand}" MinWidth="138">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Background" Value="#E7ECF5" />
+                                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTextInjectionEnabled}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <TextBlock Grid.Column="2" Text="{Binding TextInjectionShortcutText}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Foreground="{StaticResource SecondaryTextBrush}" />
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
 

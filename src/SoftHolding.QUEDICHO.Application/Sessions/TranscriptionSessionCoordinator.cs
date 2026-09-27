@@ -2,6 +2,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using SoftHolding.QUEDICHO.Application.Audio;
 using SoftHolding.QUEDICHO.Application.Persistence;
+using SoftHolding.QUEDICHO.Application.TextInjection;
 using SoftHolding.QUEDICHO.Application.Transcription;
 using SoftHolding.QUEDICHO.Domain.Sessions;
 using SoftHolding.QUEDICHO.Domain.Transcripts;
@@ -14,6 +15,7 @@ public sealed class TranscriptionSessionCoordinator(
     IAudioChunkProcessor audioChunkProcessor,
     ITranscriptionProvider transcriptionProvider,
     ISessionRepository sessionRepository,
+    ITextInjectionService textInjectionService,
     TimeProvider timeProvider,
     ILogger<TranscriptionSessionCoordinator> logger) : ITranscriptionSessionCoordinator, IAsyncDisposable, IDisposable
 {
@@ -268,6 +270,8 @@ public sealed class TranscriptionSessionCoordinator(
     {
         await foreach (var chunk in reader.ReadAllAsync(CancellationToken.None).ConfigureAwait(false))
         {
+            var committedEndBeforeChunk = _lastCommittedEnd;
+            var committedTextBeforeChunk = _lastCommittedText;
             await foreach (var result in transcriptionProvider.TranscribeAsync(chunk, CancellationToken.None).ConfigureAwait(false))
             {
                 var text = result.Text.Trim();
@@ -278,7 +282,17 @@ public sealed class TranscriptionSessionCoordinator(
 
                 var absoluteStart = chunk.Start + result.Start;
                 var absoluteEnd = chunk.Start + result.End;
-                if (absoluteEnd <= _lastCommittedEnd ||
+                if (absoluteEnd <= _lastCommittedEnd)
+                {
+                    continue;
+                }
+
+                if (absoluteStart < committedEndBeforeChunk)
+                {
+                    text = TranscriptTextDeduplicator.RemoveRepeatedPrefix(committedTextBeforeChunk, text);
+                }
+
+                if (text.Length == 0 ||
                     string.Equals(text, _lastCommittedText, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
@@ -301,6 +315,11 @@ public sealed class TranscriptionSessionCoordinator(
                 await sessionRepository.AddSegmentAsync(segment, CancellationToken.None).ConfigureAwait(false);
                 _lastCommittedEnd = segment.EndTime;
                 _lastCommittedText = segment.Text;
+                if (segment.IsFinal)
+                {
+                    textInjectionService.Enqueue(segment);
+                }
+
                 SegmentCommitted?.Invoke(this, new TranscriptSegmentEventArgs(segment));
             }
         }

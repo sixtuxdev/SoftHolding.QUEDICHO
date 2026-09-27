@@ -4,6 +4,7 @@
     <TargetFramework>net9.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../SoftHolding.QUEDICHO.Application/SoftHolding.QUEDICHO.Application.csproj" />

@@ -8,6 +8,7 @@ using Serilog;
 using SoftHolding.QUEDICHO.Application.Sessions;
 using SoftHolding.QUEDICHO.Audio;
 using SoftHolding.QUEDICHO.Desktop.ViewModels;
+using SoftHolding.QUEDICHO.Desktop.TextInjection;
 using SoftHolding.QUEDICHO.Infrastructure;
 using SoftHolding.QUEDICHO.Infrastructure.Persistence;
 using SoftHolding.QUEDICHO.Transcription;
@@ -51,6 +52,7 @@ public partial class App : System.Windows.Application
             builder.Services.AddWindowsAudio(builder.Configuration);
             builder.Services.AddLocalWhisperTranscription(builder.Configuration);
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddWindowsTextInjection(builder.Configuration);
             builder.Services.AddSingleton<ITranscriptionSessionCoordinator, TranscriptionSessionCoordinator>();
             builder.Services.AddSingleton<MainWindowViewModel>();
             builder.Services.AddSingleton<MainWindow>();

@@ -9,4 +9,7 @@ internal static partial class WhisperLog
 
     [LoggerMessage(3002, LogLevel.Information, "Transcribed {AudioDurationMs} ms in {ElapsedMs} ms")]
     public static partial void ChunkTranscribed(ILogger logger, double audioDurationMs, double elapsedMs);
+
+    [LoggerMessage(3003, LogLevel.Debug, "Discarded uncertain segment with probability {Probability} and no-speech probability {NoSpeechProbability}")]
+    public static partial void SegmentDiscarded(ILogger logger, double? probability, float noSpeechProbability);
 }

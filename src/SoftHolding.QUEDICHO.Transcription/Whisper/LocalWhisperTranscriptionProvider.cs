@@ -37,13 +37,7 @@ public sealed class LocalWhisperTranscriptionProvider(
                 return;
             }
 
-            var modelDirectory = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SoftHolding",
-                "QUEDICHO",
-                "Models");
-            Directory.CreateDirectory(modelDirectory);
-            var modelPath = Path.Combine(modelDirectory, _options.ModelFileName);
+            var modelPath = ResolveModelPath();
 
             if (!File.Exists(modelPath) || new FileInfo(modelPath).Length == 0)
             {
@@ -109,6 +103,26 @@ public sealed class LocalWhisperTranscriptionProvider(
             logger,
             chunk.Duration.TotalMilliseconds,
             System.Diagnostics.Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
+    }
+
+    private string ResolveModelPath()
+    {
+        var bundledModelPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Models",
+            _options.ModelFileName);
+        if (File.Exists(bundledModelPath) && new FileInfo(bundledModelPath).Length > 0)
+        {
+            return bundledModelPath;
+        }
+
+        var modelDirectory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SoftHolding",
+            "QUEDICHO",
+            "Models");
+        Directory.CreateDirectory(modelDirectory);
+        return Path.Combine(modelDirectory, _options.ModelFileName);
     }
 
     private async Task DownloadModelAsync(string modelPath, CancellationToken cancellationToken)

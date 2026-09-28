@@ -17,6 +17,16 @@ dotnet build SoftHolding.QUEDICHO.slnx
 dotnet run --project src/SoftHolding.QUEDICHO.Desktop/SoftHolding.QUEDICHO.Desktop.csproj
 ```
 
+## Generar el instalador de Windows 11
+
+El instalador incluye la aplicación autocontenida para equipos x64 y ARM64, el modelo local `ggml-base.bin` y el redistribuible oficial de Microsoft Visual C++. El equipo donde se instale no necesita tener .NET ni descargar el modelo en el primer inicio. Para generarlo ejecuta:
+
+```powershell
+.\build-installer.ps1 -Version 1.0.0
+```
+
+El resultado se genera en `artifacts\installer\output`. El script ejecuta las pruebas, publica ambas arquitecturas, verifica el SHA-256 del modelo Whisper, valida la firma digital del redistribuible de Microsoft y descarga una copia portátil verificada de NSIS 3.12. NSIS usa una licencia permisiva compatible con distribución comercial.
+
 En la ventana:
 
 1. Selecciona el dispositivo que está reproduciendo el audio.
